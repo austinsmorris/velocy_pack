@@ -1,3 +1,3 @@
 defprotocol VelocyPack.Encoder do
-  def encode(value, options)
+  def encode(value, options \\ [])
 end
