@@ -1,8 +1,9 @@
 defmodule VelocyPackTest do
-  use ExUnit.Case
-  doctest VelocyPack
+  alias VelocyPack
 
-  test "the truth" do
-    assert 1 + 1 == 2
+  use ExUnit.Case, async: true
+
+  test "encode/2 encodes to VPack" do
+    assert VelocyPack.encode(nil) == 0x18
   end
 end

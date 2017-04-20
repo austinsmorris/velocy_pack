@@ -3,16 +3,9 @@ defmodule VelocyPack do
   Documentation for VelocyPack.
   """
 
-  @doc """
-  Hello world.
+  alias VelocyPack.Encoder
 
-  ## Examples
-
-      iex> VelocyPack.hello
-      :world
-
-  """
-  def hello do
-    :world
+  def encode(value, options \\ []) do
+    Encoder.encode(value, options)
   end
 end
