@@ -1,13 +1,21 @@
 defmodule VelocyPack.Mixfile do
+  @moduledoc false
+
   use Mix.Project
 
   def project do
-    [app: :velocy_pack,
-     version: "0.1.0",
-     elixir: "~> 1.4",
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
-     deps: deps()]
+    [
+      app: :velocy_pack,
+      version: "0.0.1",
+      elixir: "~> 1.4",
+      build_embedded: Mix.env == :prod,
+      start_permanent: Mix.env == :prod,
+      name: "VelocyPack",
+      deps: deps(),
+      description: description(),
+      package: package(),
+      source_url: "https://github.com/austinsmorris/velocy_pack",
+    ]
   end
 
   # Configuration for the OTP application
@@ -28,6 +36,24 @@ defmodule VelocyPack.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    []
+    [
+      {:credo, "~> 0.7", only: [:dev, :test]},
+      {:ex_doc, "~> 0.15", only: :dev},
+    ]
+  end
+
+  defp description do
+    """
+    An Elixir implementation for VelocyPack.
+    """
+  end
+
+  defp package do
+    [
+      files: ["config", "lib", "test", ".gitignore", ".travis.yml", "LICENSE*", "mix.exs", "README*"],
+      maintainers: ["Austin S. Morris"],
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/austinsmorris/velocy_pack"},
+    ]
   end
 end

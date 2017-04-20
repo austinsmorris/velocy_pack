@@ -21,3 +21,6 @@ erl_crash.dump
 
 # Ignore JetBrains
 /.idea
+
+# Ignore the tmp directory
+/tmp
