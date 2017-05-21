@@ -10,7 +10,12 @@ defmodule VelocyPack.Encoder.BitStringTest do
   end
 
   test "encode a short string" do
-    assert VelocyPack.encode("foo") == <<0x43, 0x66, 0x6f, 0x6f>>
+    assert VelocyPack.encode("a") == <<0x41, "a">>
+    assert VelocyPack.encode("foo") == <<0x43, "foo">>
+
+    string = "asdlfkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdfasdflkajsdflkjas"
+      <> "dfasdfasdfasdfasdfalka"
+    assert VelocyPack.encode(string) == <<0xbe, string::binary>>
   end
 
   test "encode a long string" do
