@@ -51,7 +51,7 @@
         {Credo.Check.Consistency.LineEndings},
         {Credo.Check.Consistency.MultiAliasImportRequireUse},
         {Credo.Check.Consistency.ParameterPatternMatching},
-        {Credo.Check.Consistency.SpaceAroundOperators},
+        {Credo.Check.Consistency.SpaceAroundOperators, exit_status: 0},
         {Credo.Check.Consistency.SpaceInParentheses},
         {Credo.Check.Consistency.TabsOrSpaces},
 
