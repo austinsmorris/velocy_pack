@@ -42,4 +42,10 @@ defimpl VelocyPack.Encoder, for: Integer do
   def encode(_, _) do
     raise "Cannot encode integers greater than 18_446_744_073_709_551_615."
   end
+
+  def encode_with_size(0, _), do: {0x30, 1}
+  def encode_with_size(1, _), do: {0x31, 1}
+  def encode_with_size(2, _), do: {0x32, 1}
+
+  def encode_with_size(value, _) when value <= 255, do: {<<0x28, value::little-unsigned-size(8)>>, 2}
 end
