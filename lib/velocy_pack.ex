@@ -6,23 +6,19 @@ defmodule VelocyPack do
   alias VelocyPack.Encoder
 
   def encode(value, options \\ []) do
-    try do
-      {:ok, encode_to_iodata!(value, options) |> IO.iodata_to_binary()}
-    rescue
-      error -> {:error, error}
-    end
+    {:ok, value |> encode_to_iodata!(options) |> IO.iodata_to_binary()}
+  rescue
+    error -> {:error, error}
   end
 
   def encode!(value, options \\ []) do
-    encode_to_iodata!(value, options) |> IO.iodata_to_binary()
+    value |> encode_to_iodata!(options) |> IO.iodata_to_binary()
   end
 
   def encode_to_iodata(value, options \\ []) do
-    try do
-      {:ok, encode_to_iodata!(value, options)}
-    rescue
-      error -> {:error, error}
-    end
+    {:ok, encode_to_iodata!(value, options)}
+  rescue
+    error -> {:error, error}
   end
 
   def encode_to_iodata!(value, options \\ []) do

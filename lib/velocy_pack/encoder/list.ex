@@ -18,10 +18,21 @@ defimpl VelocyPack.Encoder, for: List do
   end
 
   defp create_list_with_index_table({list_size, nritems, reversed_list_with_sizes}) do # todo - when nritems/list_size?
-    {list, index_table, _} = Enum.reduce(reversed_list_with_sizes, {[], [], list_size + 3}, fn({item, size}, {l, it, acc}) ->
-      {[item | l], [acc - size | it], acc - size}
-    end)
-    [0x06, <<(list_size + nritems + 3)::little-unsigned-size(8)>>, <<nritems::little-unsigned-size(8)>>, list, index_table]
+    {list, index_table, _} = Enum.reduce(
+      reversed_list_with_sizes,
+      {[], [], list_size + 3},
+      fn({item, size}, {l, it, acc}) ->
+        {[item | l], [acc - size | it], acc - size}
+      end
+    )
+
+    [
+      0x06,
+      <<(list_size + nritems + 3)::little-unsigned-size(8)>>,
+      <<nritems::little-unsigned-size(8)>>,
+      list,
+      index_table
+    ]
   end
 
   defp get_encoded_size([0x06, <<size::little-unsigned-size(8)>> | _]), do: size
