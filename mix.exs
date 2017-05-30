@@ -38,7 +38,7 @@ defmodule VelocyPack.Mixfile do
   defp deps do
     [
       {:credo, "~> 0.7", only: [:dev, :test]},
-      {:ex_doc, "~> 0.15", only: :dev},
+      {:ex_doc, "~> 0.16", only: :dev},
     ]
   end
 
