@@ -4,7 +4,7 @@ defmodule VelocyPack.Encoder.MapTest do
   use ExUnit.Case, async: true
 
   test "encode() with empty map" do
-    assert Encoder.encode(%{}) == 0x0a
+    assert Encoder.encode(%{}) == [0x0a]
   end
 
   test "encode_with_size() with empty map" do
