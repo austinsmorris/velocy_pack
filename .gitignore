@@ -19,8 +19,5 @@ erl_crash.dump
 # Also ignore archive artifacts (built via "mix archive.build").
 *.ez
 
-# Ignore JetBrains
-/.idea
-
 # Ignore the tmp directory
 /tmp
