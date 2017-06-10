@@ -18,6 +18,10 @@ defmodule VelocyPack.Encoder.AtomTest do
     assert Encoder.encode(:true) == [0x1a]
   end
 
+  test "encode() an atom" do
+    assert Encoder.encode(:foo) == Encoder.encode("foo")
+  end
+
   test "encode_with_size() nil" do
     assert Encoder.encode_with_size(nil) == {0x18, 1}
     assert Encoder.encode_with_size(:nil) == {0x18, 1}
@@ -31,5 +35,9 @@ defmodule VelocyPack.Encoder.AtomTest do
   test "encode_with_size() true" do
     assert Encoder.encode_with_size(true) == {0x1a, 1}
     assert Encoder.encode_with_size(:true) == {0x1a, 1}
+  end
+
+  test "encode_with_size() an atom" do
+    assert Encoder.encode_with_size(:foo) == Encoder.encode_with_size("foo")
   end
 end
