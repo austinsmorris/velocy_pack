@@ -7,8 +7,8 @@ defmodule VelocyPack.Decoder.List do
 
   defp do_decode(data, list) do
     case Decoder.decode(data) do
-      {:ok, value, ""} -> list ++ [value]
-      {:ok, value, tail} -> do_decode(tail, list ++ [value])
+      {:ok, value, ""} -> [value | list] |> Enum.reverse
+      {:ok, value, tail} -> do_decode(tail, [value | list])
     end
   end
 end
