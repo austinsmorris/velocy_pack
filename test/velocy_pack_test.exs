@@ -8,7 +8,7 @@ defmodule VelocyPackTest do
   end
 
   test "encode/2 with error" do
-    assert {:error, %Protocol.UndefinedError{} = error} = VelocyPack.encode(make_ref())
+    assert {:error, %Protocol.UndefinedError{}} = VelocyPack.encode(make_ref())
   end
 
   test "encode!/2 encodes to binary VelocyPack" do
@@ -24,7 +24,7 @@ defmodule VelocyPackTest do
   end
 
   test "encode_to_iodata/2 with error" do
-    assert {:error, %Protocol.UndefinedError{} = error} = VelocyPack.encode_to_iodata(make_ref())
+    assert {:error, %Protocol.UndefinedError{}} = VelocyPack.encode_to_iodata(make_ref())
   end
 
   test "encode_to_iodata!/2 encodes to an iodata list of VelocyPack" do
@@ -34,4 +34,23 @@ defmodule VelocyPackTest do
   test "encode_to_iodata!/2 will raise with error" do
     assert_raise(Protocol.UndefinedError, fn() -> VelocyPack.encode_to_iodata!(make_ref()) end)
   end
+
+  test "decode/2 decodes from binary VelocyPack" do
+    assert VelocyPack.decode(<<0x18>>) == {:ok, nil, ""}
+  end
+
+  test "decode/2 decodes from binary VelocyPack with a tail" do
+    assert VelocyPack.decode(<<0x18, 0>>) == {:ok, nil, <<0>>}
+  end
+
+  test "decode/2 with error" do
+    assert {:error, %FunctionClauseError{}} = VelocyPack.decode(<<0x00>>)
+  end
+
+  test "decode!/2 decodes from binary VelocyPack" do
+    assert VelocyPack.decode!(<<0x18>>) == nil
+  end
+
+  # todo - test decode!/2 when there are multiple values
+  # todo = test decode!/2 with error
 end
