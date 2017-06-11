@@ -72,6 +72,12 @@ defmodule VelocyPack.Decoder do
   # todo - ensure decoded list has the indicated number of items
   def decode(<<0x01, tail::binary>>, _options), do: {:ok, [], tail}
 
+  def decode(<<0x02, length::little-unsigned-size(8), rest::binary>>, _options) do
+    list_length = (length - 2) * 8
+    <<list::size(list_length), tail::binary>> = rest
+    {:ok, DList.decode(<<list::size(list_length)>>), tail}
+  end
+
   def decode(<<0x06, l::little-unsigned-size(8), n::little-unsigned-size(8), 0::size(48), r::binary>>, options) do
     decode(<<0x06, (l - 6)::little-unsigned-size(8), n::little-unsigned-size(8), r::binary>>, options)
   end
@@ -100,12 +106,18 @@ defmodule VelocyPack.Decoder do
   def decode(<<0x0b, length::little-unsigned-size(8), number::little-unsigned-size(8), rest::binary>>, _options) do
     map_length = (length - 3) * 8
     <<map::size(map_length), tail::binary>> = rest
-    {:ok, DMap.decode(<<map::size(map_length)>>, length - 3, number, 8), tail}
+    {:ok, DMap.decode(<<map::size(map_length)>>, length - 3, number, 8, 0), tail}
   end
 
+  def decode(<<0x0c, length::little-unsigned-size(16), number::little-unsigned-size(16), 0::size(32), rest::binary>>, _options) do
+    # credo:disable-for-previous-line Credo.Check.Readability.MaxLineLength
+    map_length = (length - 9) * 8
+    <<map::size(map_length), tail::binary>> = rest
+    {:ok, DMap.decode(<<map::size(map_length)>>, length - 9, number, 16, 4), tail}
+  end
   def decode(<<0x0c, length::little-unsigned-size(16), number::little-unsigned-size(16), rest::binary>>, _options) do
     map_length = (length - 5) * 8
     <<map::size(map_length), tail::binary>> = rest
-    {:ok, DMap.decode(<<map::size(map_length)>>, length - 5, number, 16), tail}
+    {:ok, DMap.decode(<<map::size(map_length)>>, length - 5, number, 16, 0), tail}
   end
 end
