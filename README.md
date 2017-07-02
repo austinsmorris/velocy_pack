@@ -1,5 +1,7 @@
 # VelocyPack
 
+[![Build Status](https://travis-ci.org/austinsmorris/velocy_pack.svg?branch=master)](https://travis-ci.org/austinsmorris/velocy_pack)
+
 **TODO: Add description**
 
 ## Installation
