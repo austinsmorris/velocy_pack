@@ -98,6 +98,14 @@ defmodule VelocyPack.Decoder do
     {:ok, DList.decode(<<list::size(list_length)>>), tail}
   end
 
+  def decode(<<0x13, rest::binary>>, _options) do
+    {full_list_byte_size, list_size_byte_size} = DList.get_compact_list_sizes(rest)
+    list_bit_size = (full_list_byte_size - list_size_byte_size - 1) * 8
+    list_size_bit_size = list_size_byte_size * 8
+    <<_::size(list_size_bit_size), list::size(list_bit_size), tail::binary>> = rest
+    {:ok, DList.decode(<<list::size(list_bit_size)>>, list_bit_size), tail}
+  end
+
   # map
   # todo - incomplete map
   # todo - ensure decoded map has the indicated number of itesm
@@ -119,5 +127,13 @@ defmodule VelocyPack.Decoder do
     map_length = (length - 5) * 8
     <<map::size(map_length), tail::binary>> = rest
     {:ok, DMap.decode(<<map::size(map_length)>>, length - 5, number, 16, 0), tail}
+  end
+
+  def decode(<<0x14, rest::binary>>, _options) do
+    {full_map_byte_size, map_size_byte_size} = DMap.get_compact_map_sizes(rest)
+    map_bit_size = (full_map_byte_size - map_size_byte_size - 1) * 8
+    map_size_bit_size = map_size_byte_size * 8
+    <<_::size(map_size_bit_size), map::size(map_bit_size), tail::binary>> = rest
+    {:ok, DMap.decode(<<map::size(map_bit_size)>>, map_bit_size), tail}
   end
 end
