@@ -1,6 +1,17 @@
 defmodule VelocyPack.Decoder.MapTest do
   use ExUnit.Case, async: true
 
+  # todo - decode 1-byte offset with padding
+
+  test "decode() map with 1-byte offset without padding" do
+    foo = <<11, 43, 3, 51, 76, 102, 111, 111, 47, 50, 49, 54, 50, 53, 49, 57, 53, 49, 72, 50, 49, 54, 50, 53, 49, 57,
+      53, 50, 75, 95, 86, 107, 51, 70, 65, 112, 87, 45, 45, 45, 3, 17, 27>>
+
+    map = %{"_id" => "foo/21625195", "_key" => "21625195", "_rev" => "_Vk3FApW---"}
+
+    assert VelocyPack.decode(foo) === {:ok, map, ""}
+  end
+
   test "decode() map with 2-byte offset and zero-byte padding" do
     foo = <<12, 44, 1, 15, 0, 0, 0, 0, 0, 68, 117, 115, 101, 114, 24, 72, 100, 97, 116, 97, 98, 97, 115, 101, 71, 95,
       115, 121, 115, 116, 101, 109, 67, 117, 114, 108, 76, 47, 95, 97, 100, 109, 105, 110, 47, 101, 99, 104, 111, 72,
@@ -36,6 +47,8 @@ defmodule VelocyPack.Decoder.MapTest do
     assert VelocyPack.decode(foo) == {:ok, map, ""}
   end
 
+  # todo - decode 2-byte offset without padding
+
   test "decode() compact map" do
     foo = <<0x14, 0xcd, 0x01, 0x47, 0x71, 0x75, 0x65, 0x72, 0x69, 0x65, 0x73, 0x13, 0xc1, 0x01, 0x14, 0xbd, 0x01, 0x44,
       0x6e, 0x61, 0x6d, 0x65, 0x43, 0x66, 0x6f, 0x6f, 0x49, 0x70, 0x61, 0x72, 0x61, 0x6d, 0x65, 0x74, 0x65, 0x72, 0x0a,
@@ -60,4 +73,6 @@ defmodule VelocyPack.Decoder.MapTest do
 
     assert VelocyPack.decode(foo) == {:ok, map, ""}
   end
+
+  # todo - test translating arango keys
 end

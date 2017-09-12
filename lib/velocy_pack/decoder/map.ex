@@ -3,6 +3,8 @@ defmodule VelocyPack.Decoder.Map do
 
   use Bitwise, skip_operators: true
 
+  @translate_arango_key Application.get_env(:velocy_pack, :translate_arango_key, true)
+
   def decode(map, map_bit_size), do: decode_compact_map(map, map_bit_size)
 
   def decode(map, byte_length, number, offset_size, padding) do
@@ -25,10 +27,9 @@ defmodule VelocyPack.Decoder.Map do
       |> do_build_map(keys, values)
   end
 
-  # credo:disable-for-next-line Credo.Check.Refactor.FunctionArity
+  # credo:disable-for-lines:2 Credo.Check.Refactor.FunctionArity
   defp do_decode(_map, _byte_length, 0, _offset_size, _padding, keys, values), do: do_build_map(%{}, keys, values)
   defp do_decode(map, byte_length, number, offset_size, padding, keys, values) do
-    # credo:disable-for-previous-line Credo.Check.Refactor.FunctionArity
     prefix_length = (byte_length - div(offset_size, 8)) * 8
     <<next_map::size(prefix_length), offset::little-unsigned-size(offset_size)>> = map
 
@@ -36,8 +37,9 @@ defmodule VelocyPack.Decoder.Map do
     <<_::size(pair_offset_size), pair::binary>> = map
 
     # todo - error handling
-    {:ok, key, tail} = VelocyPack.decode(pair)
+    {:ok, vpack_key, tail} = VelocyPack.decode(pair)
     {:ok, value, _} = VelocyPack.decode(tail)
+    key = translate_arango_key(vpack_key, @translate_arango_key)
 
     do_decode(
       <<next_map::size(prefix_length)>>,
@@ -80,4 +82,11 @@ defmodule VelocyPack.Decoder.Map do
       Bitwise.bsl(value, shift) + acc
     )
   end
+
+  defp translate_arango_key(1, true), do: "_key"
+  defp translate_arango_key(2, true), do: "_rev"
+  defp translate_arango_key(3, true), do: "_id"
+  defp translate_arango_key(4, true), do: "_from"
+  defp translate_arango_key(5, true), do: "_to"
+  defp translate_arango_key(key, _), do: key
 end
