@@ -1,18 +1,18 @@
 defmodule VelocyPack.Encoder.AtomTest do
-  alias VelocyPack.Encoder
-
   use ExUnit.Case, async: true
 
+  alias VelocyPack.Encoder
+
   test "encode() nil" do
-    assert Encoder.encode(nil) === [0x18]
+    assert Encoder.encode(nil) === 0x18
   end
 
   test "encode() false" do
-    assert Encoder.encode(false) === [0x19]
+    assert Encoder.encode(false) === 0x19
   end
 
   test "encode() true" do
-    assert Encoder.encode(true) === [0x1A]
+    assert Encoder.encode(true) === 0x1A
   end
 
   test "encode() an atom" do
