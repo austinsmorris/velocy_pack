@@ -3,7 +3,7 @@ defmodule VelocyPack.Encode do
 
   alias VelocyPack.Encoder
 
-  def encode(value, opts \\ []) do
+  def encode(value, _opts \\ []) do
     {:ok, do_encode(value)}
   end
 
@@ -18,6 +18,14 @@ defmodule VelocyPack.Encode do
   def encode_integer(value) when is_integer(value), do: do_encode_integer(value)
 
   def encode_integer_with_size(value) when is_integer(value), do: do_encode_integer_with_size(value)
+
+  def encode_float(value) when is_float(value), do: do_encode_float(value)
+
+  def encode_float_with_size(value) when is_float(value), do: do_encode_float_with_size(value)
+
+  def encode_list(value) when is_list(value), do: do_encode_list(value)
+
+  def encode_list_with_size(value) when is_list(value), do: do_encode_list_with_size(value)
 
   defp do_encode(value) when is_atom(value), do: do_encode_atom(value)
   defp do_encode(value) when is_binary(value), do: do_encode_string(value)
@@ -172,15 +180,13 @@ defmodule VelocyPack.Encode do
     raise "Cannot encode integers greater than 18_446_744_073_709_551_615."
   end
 
-  defp do_encode_float(value) do
+  defp do_encode_float(_value) do
   end
 
-  defp do_encode_float_with_size(value) do
+  defp do_encode_float_with_size(_value) do
   end
 
-  defp do_encode_list(value) do
-  end
+  def do_encode_list([]), do: 0x01
 
-  defp do_encode_list_with_size(value) do
-  end
+  def do_encode_list_with_size([]), do: {0x01, 1}
 end
