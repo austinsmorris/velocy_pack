@@ -17,12 +17,12 @@ defmodule VelocyPack.Encoder.IntegerTest do
   end
 
   test "encode() small negative integers" do
-    assert Encoder.encode(-6) == 0x3a
-    assert Encoder.encode(-5) == 0x3b
-    assert Encoder.encode(-4) == 0x3c
-    assert Encoder.encode(-3) == 0x3d
-    assert Encoder.encode(-2) == 0x3e
-    assert Encoder.encode(-1) == 0x3f
+    assert Encoder.encode(-6) == 0x3A
+    assert Encoder.encode(-5) == 0x3B
+    assert Encoder.encode(-4) == 0x3C
+    assert Encoder.encode(-3) == 0x3D
+    assert Encoder.encode(-2) == 0x3E
+    assert Encoder.encode(-1) == 0x3F
   end
 
   test "encode() signed integers" do
@@ -62,23 +62,23 @@ defmodule VelocyPack.Encoder.IntegerTest do
     assert Encoder.encode(256) == <<0x29, 0, 1>>
     assert Encoder.encode(65_535) == <<0x29, 255, 255>>
 
-    assert Encoder.encode(65_536) == <<0x2a, 0, 0, 1>>
-    assert Encoder.encode(16_777_215) == <<0x2a, 255, 255, 255>>
+    assert Encoder.encode(65_536) == <<0x2A, 0, 0, 1>>
+    assert Encoder.encode(16_777_215) == <<0x2A, 255, 255, 255>>
 
-    assert Encoder.encode(16_777_216) == <<0x2b, 0, 0, 0, 1>>
-    assert Encoder.encode(4_294_967_295) == <<0x2b, 255, 255, 255, 255>>
+    assert Encoder.encode(16_777_216) == <<0x2B, 0, 0, 0, 1>>
+    assert Encoder.encode(4_294_967_295) == <<0x2B, 255, 255, 255, 255>>
 
-    assert Encoder.encode(4_294_967_296) == <<0x2c, 0, 0, 0, 0, 1>>
-    assert Encoder.encode(1_099_511_627_775) == <<0x2c, 255, 255, 255, 255, 255>>
+    assert Encoder.encode(4_294_967_296) == <<0x2C, 0, 0, 0, 0, 1>>
+    assert Encoder.encode(1_099_511_627_775) == <<0x2C, 255, 255, 255, 255, 255>>
 
-    assert Encoder.encode(1_099_511_627_776) == <<0x2d, 0, 0, 0, 0, 0, 1>>
-    assert Encoder.encode(281_474_976_710_655) == <<0x2d, 255, 255, 255, 255, 255, 255>>
+    assert Encoder.encode(1_099_511_627_776) == <<0x2D, 0, 0, 0, 0, 0, 1>>
+    assert Encoder.encode(281_474_976_710_655) == <<0x2D, 255, 255, 255, 255, 255, 255>>
 
-    assert Encoder.encode(281_474_976_710_656) == <<0x2e, 0, 0, 0, 0, 0, 0, 1>>
-    assert Encoder.encode(72_057_594_037_927_935) == <<0x2e, 255, 255, 255, 255, 255, 255, 255>>
+    assert Encoder.encode(281_474_976_710_656) == <<0x2E, 0, 0, 0, 0, 0, 0, 1>>
+    assert Encoder.encode(72_057_594_037_927_935) == <<0x2E, 255, 255, 255, 255, 255, 255, 255>>
 
-    assert Encoder.encode(72_057_594_037_927_936) == <<0x2f, 0, 0, 0, 0, 0, 0, 0, 1>>
-    assert Encoder.encode(18_446_744_073_709_551_615) == <<0x2f, 255, 255, 255, 255, 255, 255, 255, 255>>
+    assert Encoder.encode(72_057_594_037_927_936) == <<0x2F, 0, 0, 0, 0, 0, 0, 0, 1>>
+    assert Encoder.encode(18_446_744_073_709_551_615) == <<0x2F, 255, 255, 255, 255, 255, 255, 255, 255>>
 
     assert_raise(RuntimeError, "Cannot encode integers greater than 18_446_744_073_709_551_615.", fn ->
       Encoder.encode(18_446_744_073_709_551_616)
@@ -99,12 +99,12 @@ defmodule VelocyPack.Encoder.IntegerTest do
   end
 
   test "encode_with_size() small negative integers" do
-    assert Encoder.encode_with_size(-6) == {0x3a, 1}
-    assert Encoder.encode_with_size(-5) == {0x3b, 1}
-    assert Encoder.encode_with_size(-4) == {0x3c, 1}
-    assert Encoder.encode_with_size(-3) == {0x3d, 1}
-    assert Encoder.encode_with_size(-2) == {0x3e, 1}
-    assert Encoder.encode_with_size(-1) == {0x3f, 1}
+    assert Encoder.encode_with_size(-6) == {0x3A, 1}
+    assert Encoder.encode_with_size(-5) == {0x3B, 1}
+    assert Encoder.encode_with_size(-4) == {0x3C, 1}
+    assert Encoder.encode_with_size(-3) == {0x3D, 1}
+    assert Encoder.encode_with_size(-2) == {0x3E, 1}
+    assert Encoder.encode_with_size(-1) == {0x3F, 1}
   end
 
   test "encode_with_size() signed integers" do
@@ -144,23 +144,23 @@ defmodule VelocyPack.Encoder.IntegerTest do
     assert Encoder.encode_with_size(256) == {<<0x29, 0, 1>>, 3}
     assert Encoder.encode_with_size(65_535) == {<<0x29, 255, 255>>, 3}
 
-    assert Encoder.encode_with_size(65_536) == {<<0x2a, 0, 0, 1>>, 4}
-    assert Encoder.encode_with_size(16_777_215) == {<<0x2a, 255, 255, 255>>, 4}
+    assert Encoder.encode_with_size(65_536) == {<<0x2A, 0, 0, 1>>, 4}
+    assert Encoder.encode_with_size(16_777_215) == {<<0x2A, 255, 255, 255>>, 4}
 
-    assert Encoder.encode_with_size(16_777_216) == {<<0x2b, 0, 0, 0, 1>>, 5}
-    assert Encoder.encode_with_size(4_294_967_295) == {<<0x2b, 255, 255, 255, 255>>, 5}
+    assert Encoder.encode_with_size(16_777_216) == {<<0x2B, 0, 0, 0, 1>>, 5}
+    assert Encoder.encode_with_size(4_294_967_295) == {<<0x2B, 255, 255, 255, 255>>, 5}
 
-    assert Encoder.encode_with_size(4_294_967_296) == {<<0x2c, 0, 0, 0, 0, 1>>, 6}
-    assert Encoder.encode_with_size(1_099_511_627_775) == {<<0x2c, 255, 255, 255, 255, 255>>, 6}
+    assert Encoder.encode_with_size(4_294_967_296) == {<<0x2C, 0, 0, 0, 0, 1>>, 6}
+    assert Encoder.encode_with_size(1_099_511_627_775) == {<<0x2C, 255, 255, 255, 255, 255>>, 6}
 
-    assert Encoder.encode_with_size(1_099_511_627_776) == {<<0x2d, 0, 0, 0, 0, 0, 1>>, 7}
-    assert Encoder.encode_with_size(281_474_976_710_655) == {<<0x2d, 255, 255, 255, 255, 255, 255>>, 7}
+    assert Encoder.encode_with_size(1_099_511_627_776) == {<<0x2D, 0, 0, 0, 0, 0, 1>>, 7}
+    assert Encoder.encode_with_size(281_474_976_710_655) == {<<0x2D, 255, 255, 255, 255, 255, 255>>, 7}
 
-    assert Encoder.encode_with_size(281_474_976_710_656) == {<<0x2e, 0, 0, 0, 0, 0, 0, 1>>, 8}
-    assert Encoder.encode_with_size(72_057_594_037_927_935) == {<<0x2e, 255, 255, 255, 255, 255, 255, 255>>, 8}
+    assert Encoder.encode_with_size(281_474_976_710_656) == {<<0x2E, 0, 0, 0, 0, 0, 0, 1>>, 8}
+    assert Encoder.encode_with_size(72_057_594_037_927_935) == {<<0x2E, 255, 255, 255, 255, 255, 255, 255>>, 8}
 
-    assert Encoder.encode_with_size(72_057_594_037_927_936) == {<<0x2f, 0, 0, 0, 0, 0, 0, 0, 1>>, 9}
-    assert Encoder.encode_with_size(18_446_744_073_709_551_615) == {<<0x2f, 255, 255, 255, 255, 255, 255, 255, 255>>, 9}
+    assert Encoder.encode_with_size(72_057_594_037_927_936) == {<<0x2F, 0, 0, 0, 0, 0, 0, 0, 1>>, 9}
+    assert Encoder.encode_with_size(18_446_744_073_709_551_615) == {<<0x2F, 255, 255, 255, 255, 255, 255, 255, 255>>, 9}
 
     assert_raise(RuntimeError, "Cannot encode integers greater than 18_446_744_073_709_551_615.", fn ->
       Encoder.encode_with_size(18_446_744_073_709_551_616)
