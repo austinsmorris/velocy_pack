@@ -27,12 +27,17 @@ defmodule VelocyPack.Encode do
 
   def encode_list_with_size(value) when is_list(value), do: do_encode_list_with_size(value)
 
+  def encode_map(value) when is_map(value), do: do_encode_map(value)
+
+  def encode_map_with_size(value) when is_map(value), do: do_encode_map_with_size(value)
+
   defp do_encode(value) when is_atom(value), do: do_encode_atom(value)
   defp do_encode(value) when is_binary(value), do: do_encode_string(value)
   defp do_encode(value) when is_integer(value), do: do_encode_integer(value)
   defp do_encode(value) when is_float(value), do: do_encode_float(value)
   defp do_encode(value) when is_list(value), do: do_encode_list(value)
   # defp do_encode(%{__struct__: module} = value), do: do_encode_struct(value, module)
+  defp do_encode(value) when is_map(value), do: do_encode_map(value)
   # defp do_encode(value) when is_map(value), do: encode_map.(value, escape, encode_map)
   defp do_encode(value), do: Encoder.encode(value)
 
@@ -189,4 +194,8 @@ defmodule VelocyPack.Encode do
   def do_encode_list([]), do: 0x01
 
   def do_encode_list_with_size([]), do: {0x01, 1}
+
+  def do_encode_map(%{}), do: 0x0A
+
+  def do_encode_map_with_size(%{}), do: {0x0A, 1}
 end
