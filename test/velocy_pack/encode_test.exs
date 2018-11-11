@@ -28,6 +28,88 @@ defmodule VelocyPack.EncodeTest do
       {:ok, encoded} = Encode.encode(true)
       assert encoded === 0x1A
     end
+
+    test "encodes small positive integers" do
+      assert Encode.encode(0) === {:ok, 0x30}
+      assert Encode.encode(1) === {:ok, 0x31}
+      assert Encode.encode(2) === {:ok, 0x32}
+      assert Encode.encode(3) === {:ok, 0x33}
+      assert Encode.encode(4) === {:ok, 0x34}
+      assert Encode.encode(5) === {:ok, 0x35}
+      assert Encode.encode(6) === {:ok, 0x36}
+      assert Encode.encode(7) === {:ok, 0x37}
+      assert Encode.encode(8) === {:ok, 0x38}
+      assert Encode.encode(9) === {:ok, 0x39}
+    end
+
+    test "encodes small negative integers" do
+      assert Encode.encode(-6) === {:ok, 0x3A}
+      assert Encode.encode(-5) === {:ok, 0x3B}
+      assert Encode.encode(-4) === {:ok, 0x3C}
+      assert Encode.encode(-3) === {:ok, 0x3D}
+      assert Encode.encode(-2) === {:ok, 0x3E}
+      assert Encode.encode(-1) === {:ok, 0x3F}
+    end
+
+    test "encodes signed integers" do
+      assert Encode.encode(-7) === {:ok, <<0x20, 249>>}
+      assert Encode.encode(-128) === {:ok, <<0x20, 128>>}
+
+      assert Encode.encode(-129) === {:ok, <<0x21, 127, 255>>}
+      assert Encode.encode(-32_768) === {:ok, <<0x21, 0, 128>>}
+
+      assert Encode.encode(-32_769) === {:ok, <<0x22, 255, 127, 255>>}
+      assert Encode.encode(-8_388_608) === {:ok, <<0x22, 0, 0, 128>>}
+
+      assert Encode.encode(-8_388_609) === {:ok, <<0x23, 255, 255, 127, 255>>}
+      assert Encode.encode(-2_147_483_648) === {:ok, <<0x23, 0, 0, 0, 128>>}
+
+      assert Encode.encode(-2_147_483_649) === {:ok, <<0x24, 255, 255, 255, 127, 255>>}
+      assert Encode.encode(-549_755_813_888) === {:ok, <<0x24, 0, 0, 0, 0, 128>>}
+
+      assert Encode.encode(-549_755_813_889) === {:ok, <<0x25, 255, 255, 255, 255, 127, 255>>}
+      assert Encode.encode(-140_737_488_355_328) === {:ok, <<0x25, 0, 0, 0, 0, 0, 128>>}
+
+      assert Encode.encode(-140_737_488_355_329) === {:ok, <<0x26, 255, 255, 255, 255, 255, 127, 255>>}
+      assert Encode.encode(-36_028_797_018_963_968) === {:ok, <<0x26, 0, 0, 0, 0, 0, 0, 128>>}
+
+      assert Encode.encode(-36_028_797_018_963_969) === {:ok, <<0x27, 255, 255, 255, 255, 255, 255, 127, 255>>}
+      assert Encode.encode(-9_223_372_036_854_775_808) === {:ok, <<0x27, 0, 0, 0, 0, 0, 0, 0, 128>>}
+
+      assert_raise(RuntimeError, "Cannot encode integers less than -9_223_372_036_854_775_808.", fn ->
+        Encode.encode(-9_223_372_036_854_775_809)
+      end)
+    end
+
+    test "encodes unsigned integers" do
+      assert Encode.encode(10) === {:ok, <<0x28, 10>>}
+      assert Encode.encode(255) === {:ok, <<0x28, 255>>}
+
+      assert Encode.encode(256) === {:ok, <<0x29, 0, 1>>}
+      assert Encode.encode(65_535) === {:ok, <<0x29, 255, 255>>}
+
+      assert Encode.encode(65_536) === {:ok, <<0x2A, 0, 0, 1>>}
+      assert Encode.encode(16_777_215) === {:ok, <<0x2A, 255, 255, 255>>}
+
+      assert Encode.encode(16_777_216) === {:ok, <<0x2B, 0, 0, 0, 1>>}
+      assert Encode.encode(4_294_967_295) === {:ok, <<0x2B, 255, 255, 255, 255>>}
+
+      assert Encode.encode(4_294_967_296) === {:ok, <<0x2C, 0, 0, 0, 0, 1>>}
+      assert Encode.encode(1_099_511_627_775) === {:ok, <<0x2C, 255, 255, 255, 255, 255>>}
+
+      assert Encode.encode(1_099_511_627_776) === {:ok, <<0x2D, 0, 0, 0, 0, 0, 1>>}
+      assert Encode.encode(281_474_976_710_655) === {:ok, <<0x2D, 255, 255, 255, 255, 255, 255>>}
+
+      assert Encode.encode(281_474_976_710_656) === {:ok, <<0x2E, 0, 0, 0, 0, 0, 0, 1>>}
+      assert Encode.encode(72_057_594_037_927_935) === {:ok, <<0x2E, 255, 255, 255, 255, 255, 255, 255>>}
+
+      assert Encode.encode(72_057_594_037_927_936) === {:ok, <<0x2F, 0, 0, 0, 0, 0, 0, 0, 1>>}
+      assert Encode.encode(18_446_744_073_709_551_615) === {:ok, <<0x2F, 255, 255, 255, 255, 255, 255, 255, 255>>}
+
+      assert_raise(RuntimeError, "Cannot encode integers greater than 18_446_744_073_709_551_615.", fn ->
+        Encode.encode(18_446_744_073_709_551_616)
+      end)
+    end
   end
 
   describe "encode_atom/1" do
@@ -47,17 +129,17 @@ defmodule VelocyPack.EncodeTest do
     end
 
     test "encodes atom nil" do
-      encoded = Encode.encode_atom(:nil)
+      encoded = Encode.encode_atom(nil)
       assert encoded === 0x18
     end
 
     test "encodes atom false" do
-      encoded = Encode.encode_atom(:false)
+      encoded = Encode.encode_atom(false)
       assert encoded === 0x19
     end
 
     test "encodes atom true" do
-      encoded = Encode.encode_atom(:true)
+      encoded = Encode.encode_atom(true)
       assert encoded === 0x1A
     end
   end
@@ -79,18 +161,192 @@ defmodule VelocyPack.EncodeTest do
     end
 
     test "encodes atom nil" do
-      encoded = Encode.encode_atom_with_size(:nil)
+      encoded = Encode.encode_atom_with_size(nil)
       assert encoded === {0x18, 1}
     end
 
     test "encodes atom false" do
-      encoded = Encode.encode_atom_with_size(:false)
+      encoded = Encode.encode_atom_with_size(false)
       assert encoded === {0x19, 1}
     end
 
     test "encodes atom true" do
-      encoded = Encode.encode_atom_with_size(:true)
+      encoded = Encode.encode_atom_with_size(true)
       assert encoded === {0x1A, 1}
+    end
+  end
+
+  describe "encode_integer/1" do
+    test "encodes small positive integers" do
+      assert Encode.encode_integer(0) === 0x30
+      assert Encode.encode_integer(1) === 0x31
+      assert Encode.encode_integer(2) === 0x32
+      assert Encode.encode_integer(3) === 0x33
+      assert Encode.encode_integer(4) === 0x34
+      assert Encode.encode_integer(5) === 0x35
+      assert Encode.encode_integer(6) === 0x36
+      assert Encode.encode_integer(7) === 0x37
+      assert Encode.encode_integer(8) === 0x38
+      assert Encode.encode_integer(9) === 0x39
+    end
+
+    test "encodes small negative integers" do
+      assert Encode.encode_integer(-6) === 0x3A
+      assert Encode.encode_integer(-5) === 0x3B
+      assert Encode.encode_integer(-4) === 0x3C
+      assert Encode.encode_integer(-3) === 0x3D
+      assert Encode.encode_integer(-2) === 0x3E
+      assert Encode.encode_integer(-1) === 0x3F
+    end
+
+    test "encodes signed integers" do
+      assert Encode.encode_integer(-7) === <<0x20, 249>>
+      assert Encode.encode_integer(-128) === <<0x20, 128>>
+
+      assert Encode.encode_integer(-129) === <<0x21, 127, 255>>
+      assert Encode.encode_integer(-32_768) === <<0x21, 0, 128>>
+
+      assert Encode.encode_integer(-32_769) === <<0x22, 255, 127, 255>>
+      assert Encode.encode_integer(-8_388_608) === <<0x22, 0, 0, 128>>
+
+      assert Encode.encode_integer(-8_388_609) === <<0x23, 255, 255, 127, 255>>
+      assert Encode.encode_integer(-2_147_483_648) === <<0x23, 0, 0, 0, 128>>
+
+      assert Encode.encode_integer(-2_147_483_649) === <<0x24, 255, 255, 255, 127, 255>>
+      assert Encode.encode_integer(-549_755_813_888) === <<0x24, 0, 0, 0, 0, 128>>
+
+      assert Encode.encode_integer(-549_755_813_889) === <<0x25, 255, 255, 255, 255, 127, 255>>
+      assert Encode.encode_integer(-140_737_488_355_328) === <<0x25, 0, 0, 0, 0, 0, 128>>
+
+      assert Encode.encode_integer(-140_737_488_355_329) === <<0x26, 255, 255, 255, 255, 255, 127, 255>>
+      assert Encode.encode_integer(-36_028_797_018_963_968) === <<0x26, 0, 0, 0, 0, 0, 0, 128>>
+
+      assert Encode.encode_integer(-36_028_797_018_963_969) === <<0x27, 255, 255, 255, 255, 255, 255, 127, 255>>
+      assert Encode.encode_integer(-9_223_372_036_854_775_808) === <<0x27, 0, 0, 0, 0, 0, 0, 0, 128>>
+
+      assert_raise(RuntimeError, "Cannot encode integers less than -9_223_372_036_854_775_808.", fn ->
+        Encode.encode_integer(-9_223_372_036_854_775_809)
+      end)
+    end
+
+    test "encodes unsigned integers" do
+      assert Encode.encode_integer(10) === <<0x28, 10>>
+      assert Encode.encode_integer(255) === <<0x28, 255>>
+
+      assert Encode.encode_integer(256) === <<0x29, 0, 1>>
+      assert Encode.encode_integer(65_535) === <<0x29, 255, 255>>
+
+      assert Encode.encode_integer(65_536) === <<0x2A, 0, 0, 1>>
+      assert Encode.encode_integer(16_777_215) === <<0x2A, 255, 255, 255>>
+
+      assert Encode.encode_integer(16_777_216) === <<0x2B, 0, 0, 0, 1>>
+      assert Encode.encode_integer(4_294_967_295) === <<0x2B, 255, 255, 255, 255>>
+
+      assert Encode.encode_integer(4_294_967_296) === <<0x2C, 0, 0, 0, 0, 1>>
+      assert Encode.encode_integer(1_099_511_627_775) === <<0x2C, 255, 255, 255, 255, 255>>
+
+      assert Encode.encode_integer(1_099_511_627_776) === <<0x2D, 0, 0, 0, 0, 0, 1>>
+      assert Encode.encode_integer(281_474_976_710_655) === <<0x2D, 255, 255, 255, 255, 255, 255>>
+
+      assert Encode.encode_integer(281_474_976_710_656) === <<0x2E, 0, 0, 0, 0, 0, 0, 1>>
+      assert Encode.encode_integer(72_057_594_037_927_935) === <<0x2E, 255, 255, 255, 255, 255, 255, 255>>
+
+      assert Encode.encode_integer(72_057_594_037_927_936) === <<0x2F, 0, 0, 0, 0, 0, 0, 0, 1>>
+      assert Encode.encode_integer(18_446_744_073_709_551_615) === <<0x2F, 255, 255, 255, 255, 255, 255, 255, 255>>
+
+      assert_raise(RuntimeError, "Cannot encode integers greater than 18_446_744_073_709_551_615.", fn ->
+        Encode.encode_integer(18_446_744_073_709_551_616)
+      end)
+    end
+  end
+
+  describe "encode_integer_with_size/1" do
+    test "encodes small positive integers" do
+      assert Encode.encode_integer_with_size(0) === {0x30, 1}
+      assert Encode.encode_integer_with_size(1) === {0x31, 1}
+      assert Encode.encode_integer_with_size(2) === {0x32, 1}
+      assert Encode.encode_integer_with_size(3) === {0x33, 1}
+      assert Encode.encode_integer_with_size(4) === {0x34, 1}
+      assert Encode.encode_integer_with_size(5) === {0x35, 1}
+      assert Encode.encode_integer_with_size(6) === {0x36, 1}
+      assert Encode.encode_integer_with_size(7) === {0x37, 1}
+      assert Encode.encode_integer_with_size(8) === {0x38, 1}
+      assert Encode.encode_integer_with_size(9) === {0x39, 1}
+    end
+
+    test "encodes small negative integers" do
+      assert Encode.encode_integer_with_size(-6) === {0x3A, 1}
+      assert Encode.encode_integer_with_size(-5) === {0x3B, 1}
+      assert Encode.encode_integer_with_size(-4) === {0x3C, 1}
+      assert Encode.encode_integer_with_size(-3) === {0x3D, 1}
+      assert Encode.encode_integer_with_size(-2) === {0x3E, 1}
+      assert Encode.encode_integer_with_size(-1) === {0x3F, 1}
+    end
+
+    test "encodes signed integers" do
+      assert Encode.encode_integer_with_size(-7) === {<<0x20, 249>>, 2}
+      assert Encode.encode_integer_with_size(-128) === {<<0x20, 128>>, 2}
+
+      assert Encode.encode_integer_with_size(-129) === {<<0x21, 127, 255>>, 3}
+      assert Encode.encode_integer_with_size(-32_768) === {<<0x21, 0, 128>>, 3}
+
+      assert Encode.encode_integer_with_size(-32_769) === {<<0x22, 255, 127, 255>>, 4}
+      assert Encode.encode_integer_with_size(-8_388_608) === {<<0x22, 0, 0, 128>>, 4}
+
+      assert Encode.encode_integer_with_size(-8_388_609) === {<<0x23, 255, 255, 127, 255>>, 5}
+      assert Encode.encode_integer_with_size(-2_147_483_648) === {<<0x23, 0, 0, 0, 128>>, 5}
+
+      assert Encode.encode_integer_with_size(-2_147_483_649) === {<<0x24, 255, 255, 255, 127, 255>>, 6}
+      assert Encode.encode_integer_with_size(-549_755_813_888) === {<<0x24, 0, 0, 0, 0, 128>>, 6}
+
+      assert Encode.encode_integer_with_size(-549_755_813_889) === {<<0x25, 255, 255, 255, 255, 127, 255>>, 7}
+      assert Encode.encode_integer_with_size(-140_737_488_355_328) === {<<0x25, 0, 0, 0, 0, 0, 128>>, 7}
+
+      assert Encode.encode_integer_with_size(-140_737_488_355_329) === {<<0x26, 255, 255, 255, 255, 255, 127, 255>>, 8}
+      assert Encode.encode_integer_with_size(-36_028_797_018_963_968) === {<<0x26, 0, 0, 0, 0, 0, 0, 128>>, 8}
+
+      assert Encode.encode_integer_with_size(-36_028_797_018_963_969) ===
+               {<<0x27, 255, 255, 255, 255, 255, 255, 127, 255>>, 9}
+
+      assert Encode.encode_integer_with_size(-9_223_372_036_854_775_808) === {<<0x27, 0, 0, 0, 0, 0, 0, 0, 128>>, 9}
+
+      assert_raise(RuntimeError, "Cannot encode integers less than -9_223_372_036_854_775_808.", fn ->
+        Encode.encode_integer_with_size(-9_223_372_036_854_775_809)
+      end)
+    end
+
+    test "encodes unsigned integers" do
+      assert Encode.encode_integer_with_size(10) === {<<0x28, 10>>, 2}
+      assert Encode.encode_integer_with_size(255) === {<<0x28, 255>>, 2}
+
+      assert Encode.encode_integer_with_size(256) === {<<0x29, 0, 1>>, 3}
+      assert Encode.encode_integer_with_size(65_535) === {<<0x29, 255, 255>>, 3}
+
+      assert Encode.encode_integer_with_size(65_536) === {<<0x2A, 0, 0, 1>>, 4}
+      assert Encode.encode_integer_with_size(16_777_215) === {<<0x2A, 255, 255, 255>>, 4}
+
+      assert Encode.encode_integer_with_size(16_777_216) === {<<0x2B, 0, 0, 0, 1>>, 5}
+      assert Encode.encode_integer_with_size(4_294_967_295) === {<<0x2B, 255, 255, 255, 255>>, 5}
+
+      assert Encode.encode_integer_with_size(4_294_967_296) === {<<0x2C, 0, 0, 0, 0, 1>>, 6}
+      assert Encode.encode_integer_with_size(1_099_511_627_775) === {<<0x2C, 255, 255, 255, 255, 255>>, 6}
+
+      assert Encode.encode_integer_with_size(1_099_511_627_776) === {<<0x2D, 0, 0, 0, 0, 0, 1>>, 7}
+      assert Encode.encode_integer_with_size(281_474_976_710_655) === {<<0x2D, 255, 255, 255, 255, 255, 255>>, 7}
+
+      assert Encode.encode_integer_with_size(281_474_976_710_656) === {<<0x2E, 0, 0, 0, 0, 0, 0, 1>>, 8}
+
+      assert Encode.encode_integer_with_size(72_057_594_037_927_935) ===
+               {<<0x2E, 255, 255, 255, 255, 255, 255, 255>>, 8}
+
+      assert Encode.encode_integer_with_size(72_057_594_037_927_936) === {<<0x2F, 0, 0, 0, 0, 0, 0, 0, 1>>, 9}
+
+      assert Encode.encode_integer_with_size(18_446_744_073_709_551_615) ===
+               {<<0x2F, 255, 255, 255, 255, 255, 255, 255, 255>>, 9}
+
+      assert_raise(RuntimeError, "Cannot encode integers greater than 18_446_744_073_709_551_615.", fn ->
+        Encode.encode_integer_with_size(18_446_744_073_709_551_616)
+      end)
     end
   end
 
