@@ -4,11 +4,6 @@ defmodule VelocyPack.EncodeTest do
   alias VelocyPack.Encode
 
   describe "encode/2" do
-    test "encodes nil" do
-      {:ok, encoded} = Encode.encode(nil)
-      assert encoded === 0x18
-    end
-
     test "encodes an empty list" do
       {:ok, encoded} = Encode.encode([])
       assert encoded === 0x01
@@ -18,6 +13,21 @@ defmodule VelocyPack.EncodeTest do
       {:ok, encoded} = Encode.encode(%{})
       assert encoded === 0x0A
     end
+
+    test "encodes nil" do
+      {:ok, encoded} = Encode.encode(nil)
+      assert encoded === 0x18
+    end
+
+    test "encodes false" do
+      {:ok, encoded} = Encode.encode(false)
+      assert encoded === 0x19
+    end
+
+    test "encodes true" do
+      {:ok, encoded} = Encode.encode(true)
+      assert encoded === 0x1A
+    end
   end
 
   describe "encode_atom/1" do
@@ -25,12 +35,32 @@ defmodule VelocyPack.EncodeTest do
       encoded = Encode.encode_atom(nil)
       assert encoded === 0x18
     end
+
+    test "encodes false" do
+      encoded = Encode.encode_atom(false)
+      assert encoded === 0x19
+    end
+
+    test "encodes true" do
+      encoded = Encode.encode_atom(true)
+      assert encoded === 0x1A
+    end
   end
 
   describe "encode_atom_with_size/1" do
     test "encodes nil" do
       encoded = Encode.encode_atom_with_size(nil)
       assert encoded === {0x18, 1}
+    end
+
+    test "encodes false" do
+      encoded = Encode.encode_atom_with_size(false)
+      assert encoded === {0x19, 1}
+    end
+
+    test "encodes true" do
+      encoded = Encode.encode_atom_with_size(true)
+      assert encoded === {0x1A, 1}
     end
   end
 
