@@ -11,13 +11,13 @@ defmodule VelocyPack.Encode do
 
   def encode_atom_with_size(value) when is_atom(value), do: do_encode_atom_with_size(value)
 
-  def encode_string(value) when is_binary(value), do: do_encode_string(value)
-
-  def encode_string_with_size(value) when is_binary(value), do: do_encode_string_with_size(value)
-
   def encode_integer(value) when is_integer(value), do: do_encode_integer(value)
 
   def encode_integer_with_size(value) when is_integer(value), do: do_encode_integer_with_size(value)
+
+  def encode_string(value) when is_binary(value), do: do_encode_string(value)
+
+  def encode_string_with_size(value) when is_binary(value), do: do_encode_string_with_size(value)
 
   def encode_float(value) when is_float(value), do: do_encode_float(value)
 
@@ -50,28 +50,6 @@ defmodule VelocyPack.Encode do
   defp do_encode_atom_with_size(false), do: {0x19, 1}
   defp do_encode_atom_with_size(true), do: {0x1A, 1}
   defp do_encode_atom_with_size(value), do: value |> Atom.to_string() |> do_encode_string_with_size()
-
-  def do_encode_string(<<>>), do: 0x40
-
-  def do_encode_string(value) when is_binary(value) and byte_size(value) <= 126 do
-    <<byte_size(value) + 0x40, value::binary>>
-  end
-
-  def do_encode_string(value) when is_binary(value) do
-    <<0xBF, byte_size(value)::little-unsigned-size(64), value::binary>>
-  end
-
-  def do_encode_string_with_size(<<>>), do: {0x40, 1}
-
-  def do_encode_string_with_size(value) when is_binary(value) and byte_size(value) <= 126 do
-    size = byte_size(value)
-    {<<size + 0x40, value::binary>>, size + 1}
-  end
-
-  def do_encode_string_with_size(value) when is_binary(value) do
-    size = byte_size(value)
-    {<<0xBF, size::little-unsigned-size(64), value::binary>>, size + 8 + 1}
-  end
 
   defp do_encode_integer(0), do: 0x30
   defp do_encode_integer(1), do: 0x31
@@ -183,6 +161,28 @@ defmodule VelocyPack.Encode do
   defp do_encode_integer_with_size(_) do
     # todo - use a proper error type
     raise "Cannot encode integers greater than 18_446_744_073_709_551_615."
+  end
+
+  defp do_encode_string(<<>>), do: 0x40
+
+  defp do_encode_string(value) when is_binary(value) and byte_size(value) <= 126 do
+    <<byte_size(value) + 0x40, value::binary>>
+  end
+
+  defp do_encode_string(value) when is_binary(value) do
+    <<0xBF, byte_size(value)::little-unsigned-size(64), value::binary>>
+  end
+
+  defp do_encode_string_with_size(<<>>), do: {0x40, 1}
+
+  defp do_encode_string_with_size(value) when is_binary(value) and byte_size(value) <= 126 do
+    size = byte_size(value)
+    {<<size + 0x40, value::binary>>, size + 1}
+  end
+
+  defp do_encode_string_with_size(value) when is_binary(value) do
+    size = byte_size(value)
+    {<<0xBF, size::little-unsigned-size(64), value::binary>>, size + 8 + 1}
   end
 
   defp do_encode_float(_value) do

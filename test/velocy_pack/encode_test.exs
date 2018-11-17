@@ -110,6 +110,37 @@ defmodule VelocyPack.EncodeTest do
         Encode.encode(18_446_744_073_709_551_616)
       end)
     end
+
+    test "encodes empty bit string" do
+      assert Encode.encode(<<>>) == {:ok, 0x40}
+    end
+
+    test "encodes empty string" do
+      assert Encode.encode("") == {:ok, 0x40}
+    end
+
+    test "encodes a short string" do
+      assert Encode.encode("a") == {:ok, <<0x41, "a">>}
+      assert Encode.encode("foo") == {:ok, <<0x43, "foo">>}
+
+      string =
+        "asdlfkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdfasdflkajsdflkjas" <>
+          "dfasdfasdfasdfasdfalka"
+
+      assert Encode.encode(string) == {:ok, <<0xBE, string::binary>>}
+    end
+
+    test "encodes a long string" do
+      value =
+        "asdlfkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkj" <>
+          "asdflkajsdflkjasdflkjasdlksjadflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasd"
+
+      {:ok, <<indicator, size::little-unsigned-size(64), string::binary>>} = Encode.encode(value)
+
+      assert indicator == 0xBF
+      assert size == byte_size(value)
+      assert string == value
+    end
   end
 
   describe "encode_atom/1" do
@@ -347,6 +378,74 @@ defmodule VelocyPack.EncodeTest do
       assert_raise(RuntimeError, "Cannot encode integers greater than 18_446_744_073_709_551_615.", fn ->
         Encode.encode_integer_with_size(18_446_744_073_709_551_616)
       end)
+    end
+  end
+
+  describe "encode_string/1" do
+    test "encodes empty bit string" do
+      assert Encode.encode_string(<<>>) == 0x40
+    end
+
+    test "encodes empty string" do
+      assert Encode.encode_string("") == 0x40
+    end
+
+    test "encodes a short string" do
+      assert Encode.encode_string("a") == <<0x41, "a">>
+      assert Encode.encode_string("foo") == <<0x43, "foo">>
+
+      string =
+        "asdlfkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdfasdflkajsdflkjas" <>
+          "dfasdfasdfasdfasdfalka"
+
+      assert Encode.encode_string(string) == <<0xBE, string::binary>>
+    end
+
+    test "encodes a long string" do
+      value =
+        "asdlfkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkj" <>
+          "asdflkajsdflkjasdflkjasdlksjadflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasd"
+
+      <<indicator, size::little-unsigned-size(64), string::binary>> = Encode.encode_string(value)
+
+      assert indicator == 0xBF
+      assert size == byte_size(value)
+      assert string == value
+    end
+  end
+
+  describe "encode_string_with_size/1" do
+    test "encodes empty bit string" do
+      assert Encode.encode_string_with_size(<<>>) == {0x40, 1}
+    end
+
+    test "encodes empty string" do
+      assert Encode.encode_string_with_size("") == {0x40, 1}
+    end
+
+    test "encodes a short string" do
+      assert Encode.encode_string_with_size("a") == {<<0x41, "a">>, 2}
+      assert Encode.encode_string_with_size("foo") == {<<0x43, "foo">>, 4}
+
+      string =
+        "asdlfkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdfasdflkajsdflkjas" <>
+          "dfasdfasdfasdfasdfalka"
+
+      assert Encode.encode_string_with_size(string) == {<<0xBE, string::binary>>, 127}
+    end
+
+    test "encodes a long string" do
+      value =
+        "asdlfkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkj" <>
+          "asdflkajsdflkjasdflkjasdlksjadflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasd"
+
+      {<<indicator, size::little-unsigned-size(64), string::binary>>, encode_size} =
+        Encode.encode_string_with_size(value)
+
+      assert indicator == 0xBF
+      assert size == byte_size(value)
+      assert string == value
+      assert encode_size == 221
     end
   end
 
