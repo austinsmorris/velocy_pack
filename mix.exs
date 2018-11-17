@@ -6,15 +6,15 @@ defmodule VelocyPack.Mixfile do
   def project do
     [
       app: :velocy_pack,
-      version: "0.0.6",
+      version: "0.1.0",
       elixir: "~> 1.4",
-      build_embedded: Mix.env == :prod,
-      start_permanent: Mix.env == :prod,
+      build_embedded: Mix.env() == :prod,
+      start_permanent: Mix.env() == :prod,
       name: "VelocyPack",
       deps: deps(),
       description: description(),
       package: package(),
-      source_url: "https://github.com/austinsmorris/velocy_pack",
+      source_url: "https://github.com/austinsmorris/velocy_pack"
     ]
   end
 
@@ -37,8 +37,8 @@ defmodule VelocyPack.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:credo, "~> 0.8", only: [:dev, :test]},
-      {:ex_doc, "~> 0.16", only: :dev},
+      {:credo, "~> 1.0", only: [:dev, :test]},
+      {:ex_doc, "~> 0.19", only: :dev}
     ]
   end
 
@@ -53,7 +53,7 @@ defmodule VelocyPack.Mixfile do
       files: ["config", "lib", "test", ".gitignore", ".travis.yml", "LICENSE*", "mix.exs", "README*"],
       maintainers: ["Austin S. Morris"],
       licenses: ["MIT"],
-      links: %{"GitHub" => "https://github.com/austinsmorris/velocy_pack"},
+      links: %{"GitHub" => "https://github.com/austinsmorris/velocy_pack"}
     ]
   end
 end
