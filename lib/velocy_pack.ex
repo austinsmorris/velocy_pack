@@ -3,44 +3,44 @@ defmodule VelocyPack do
   Documentation for VelocyPack.
   """
 
-  alias VelocyPack.Decoder
-  alias VelocyPack.Encoder
+  alias VelocyPack.Decode
+  alias VelocyPack.Encode
 
-  def encode(value, options \\ []) do
-    {:ok, value |> encode_to_iodata!(options) |> IO.iodata_to_binary()}
-  rescue
-    error -> {:error, error}
+  def decode(data, opts \\ []) do
+    data
+    |> IO.iodata_to_binary()
+    |> Decode.decode(opts)
   end
 
-  def encode!(value, options \\ []) do
-    value |> encode_to_iodata!(options) |> IO.iodata_to_binary()
+  def decode!(data, opts \\ []) do
+    case decode(data, opts) do
+      {:ok, value} -> value
+      {:error, error} -> raise error
+    end
   end
 
-  def encode_to_iodata(value, options \\ []) do
-    {:ok, encode_to_iodata!(value, options)}
-  rescue
-    error -> {:error, error}
+  def encode(value, opts \\ []) do
+    case Encode.encode(value, opts) do
+      {:ok, encoding} -> {:ok, IO.iodata_to_binary(encoding)}
+      {:error, error} -> {:error, error}
+    end
   end
 
-  def encode_to_iodata!(value, options \\ []) do
-    Encoder.encode(value, options)
+  def encode!(value, opts \\ []) do
+    case Encode.encode(value, opts) do
+      {:ok, encoding} -> IO.iodata_to_binary(encoding)
+      {:error, error} -> raise error
+    end
   end
 
-  def decode(data, options \\ []) when is_binary(data)do
-    Decoder.decode(data, options)
-  rescue
-    error -> {:error, error}
+  def encode_to_iodata(value, opts \\ []) do
+    Encode.encode(value, opts)
   end
 
-  def decode!(data, options \\ []) when is_binary(data)do
-    case Decoder.decode(data, options) do
-      {:ok, value, ""} -> value
-      {:ok, value, tail} ->
-        # todo - raise because there are multiple values
-        :foo
-      error ->
-        # todo - raise because something bad happened
-        :foo
+  def encode_to_iodata!(value, opts \\ []) do
+    case Encode.encode(value, opts) do
+      {:ok, encoding} -> encoding
+      {:error, error} -> raise error
     end
   end
 end
