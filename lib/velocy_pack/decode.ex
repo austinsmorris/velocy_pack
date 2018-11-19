@@ -3,6 +3,9 @@ defmodule VelocyPack.Decode do
 
   use Bitwise, skip_operators: true
 
+  # todo - document and make a high level option
+  @translate_arango_key Application.get_env(:velocy_pack, :translate_arango_key, true)
+
   def decode(data, _opts \\ []) when is_binary(data) do
     try do
       do_decode(data)
@@ -86,6 +89,12 @@ defmodule VelocyPack.Decode do
   # map
   defp do_decode(<<0x0A, tail::binary>>), do: {%{}, tail}
 
+  defp do_decode(<<0x0B, length::little-unsigned-size(8), number::little-unsigned-size(8), rest::binary>>) do
+    map_length = (length - 3) * 8
+    <<map::size(map_length), tail::binary>> = rest
+    {decode_map(<<map::size(map_length)>>, length - 3, number, 8, 0), tail}
+  end
+
   defp do_decode(<<0x14, rest::binary>>) do
     {full_map_byte_size, map_size_byte_size} = get_compact_map_sizes(rest)
     map_bit_size = (full_map_byte_size - map_size_byte_size - 1) * 8
@@ -107,6 +116,10 @@ defmodule VelocyPack.Decode do
   end
 
   defp decode_map(map, map_bit_size), do: decode_compact_map(map, map_bit_size)
+
+  defp decode_map(map, byte_length, number, offset_size, padding) do
+    do_decode_map(map, byte_length, number, offset_size, padding, [], [])
+  end
 
   defp get_compact_list_sizes(list), do: do_get_compact_list_sizes(list, 0, {0, 0})
 
@@ -166,6 +179,30 @@ defmodule VelocyPack.Decode do
     end
   end
 
+  defp do_decode_map(_map, _byte_length, 0, _offset_size, _padding, keys, values), do: do_build_map(%{}, keys, values)
+
+  defp do_decode_map(map, byte_length, number, offset_size, padding, keys, values) do
+    prefix_length = (byte_length - div(offset_size, 8)) * 8
+    <<next_map::size(prefix_length), offset::little-unsigned-size(offset_size)>> = map
+
+    pair_offset_size = (offset - 1 - 2 * div(offset_size, 8) - padding) * 8
+    <<_::size(pair_offset_size), pair::binary>> = map
+
+    {vpack_key, tail} = do_decode(pair)
+    {value, _} = do_decode(tail)
+    key = translate_arango_key(vpack_key, @translate_arango_key)
+
+    do_decode_map(
+      <<next_map::size(prefix_length)>>,
+      byte_length - div(offset_size, 8),
+      number - 1,
+      offset_size,
+      padding,
+      [key | keys],
+      [value | values]
+    )
+  end
+
   defp do_get_compact_list_sizes(<<0::1, value::7, _tail::binary>>, shift, {list_bytes_acc, size_bytes_acc}) do
     {Bitwise.bsl(value, shift) + list_bytes_acc, size_bytes_acc + 1}
   end
@@ -181,4 +218,11 @@ defmodule VelocyPack.Decode do
   defp do_get_compact_map_sizes(<<1::1, value::7, tail::binary>>, shift, {map_bytes_acc, size_bytes_acc}) do
     do_get_compact_map_sizes(tail, shift + 7, {Bitwise.bsl(value, shift) + map_bytes_acc, size_bytes_acc + 1})
   end
+
+  defp translate_arango_key(1, true), do: "_key"
+  defp translate_arango_key(2, true), do: "_rev"
+  defp translate_arango_key(3, true), do: "_id"
+  defp translate_arango_key(4, true), do: "_from"
+  defp translate_arango_key(5, true), do: "_to"
+  defp translate_arango_key(key, _), do: key
 end

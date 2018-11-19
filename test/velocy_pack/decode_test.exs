@@ -182,6 +182,18 @@ defmodule VelocyPack.DecodeTest do
       assert Decode.decode(data) == {:ok, map}
     end
 
+    # todo - decode 1-byte offset with padding
+
+    test "decodes map with 1-byte offset without padding" do
+      data =
+        <<11, 43, 3, 51, 76, 102, 111, 111, 47, 50, 49, 54, 50, 53, 49, 57, 53, 49, 72, 50, 49, 54, 50, 53, 49, 57, 53,
+          50, 75, 95, 86, 107, 51, 70, 65, 112, 87, 45, 45, 45, 3, 17, 27>>
+
+      map = %{"_id" => "foo/21625195", "_key" => "21625195", "_rev" => "_Vk3FApW---"}
+
+      assert Decode.decode(data) === {:ok, map}
+    end
+
     # todo - test decoding maps
 
     # todo - test decoding multiple values (error)
