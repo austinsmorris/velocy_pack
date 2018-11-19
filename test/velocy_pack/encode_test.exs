@@ -9,6 +9,11 @@ defmodule VelocyPack.EncodeTest do
       assert encoded === 0x01
     end
 
+    test "encodes list when items are variable size" do
+      {:ok, encoded} = Encode.encode([1, "a", 10])
+      assert encoded === [0x06, <<0x0B>>, <<0x03>>, [0x31, <<0x41, 0x61>>, <<0x28, 0x0A>>], [0x03, 0x04, 0x06]]
+    end
+
     test "encodes an empty map" do
       {:ok, encoded} = Encode.encode(%{})
       assert encoded === 0x0A
@@ -112,22 +117,22 @@ defmodule VelocyPack.EncodeTest do
     end
 
     test "encodes empty bit string" do
-      assert Encode.encode(<<>>) == {:ok, 0x40}
+      assert Encode.encode(<<>>) === {:ok, 0x40}
     end
 
     test "encodes empty string" do
-      assert Encode.encode("") == {:ok, 0x40}
+      assert Encode.encode("") === {:ok, 0x40}
     end
 
     test "encodes a short string" do
-      assert Encode.encode("a") == {:ok, <<0x41, "a">>}
-      assert Encode.encode("foo") == {:ok, <<0x43, "foo">>}
+      assert Encode.encode("a") === {:ok, <<0x41, "a">>}
+      assert Encode.encode("foo") === {:ok, <<0x43, "foo">>}
 
       string =
         "asdlfkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdfasdflkajsdflkjas" <>
           "dfasdfasdfasdfasdfalka"
 
-      assert Encode.encode(string) == {:ok, <<0xBE, string::binary>>}
+      assert Encode.encode(string) === {:ok, <<0xBE, string::binary>>}
     end
 
     test "encodes a long string" do
@@ -137,9 +142,9 @@ defmodule VelocyPack.EncodeTest do
 
       {:ok, <<indicator, size::little-unsigned-size(64), string::binary>>} = Encode.encode(value)
 
-      assert indicator == 0xBF
-      assert size == byte_size(value)
-      assert string == value
+      assert indicator === 0xBF
+      assert size === byte_size(value)
+      assert string === value
     end
   end
 
@@ -383,22 +388,22 @@ defmodule VelocyPack.EncodeTest do
 
   describe "encode_string/1" do
     test "encodes empty bit string" do
-      assert Encode.encode_string(<<>>) == 0x40
+      assert Encode.encode_string(<<>>) === 0x40
     end
 
     test "encodes empty string" do
-      assert Encode.encode_string("") == 0x40
+      assert Encode.encode_string("") === 0x40
     end
 
     test "encodes a short string" do
-      assert Encode.encode_string("a") == <<0x41, "a">>
-      assert Encode.encode_string("foo") == <<0x43, "foo">>
+      assert Encode.encode_string("a") === <<0x41, "a">>
+      assert Encode.encode_string("foo") === <<0x43, "foo">>
 
       string =
         "asdlfkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdfasdflkajsdflkjas" <>
           "dfasdfasdfasdfasdfalka"
 
-      assert Encode.encode_string(string) == <<0xBE, string::binary>>
+      assert Encode.encode_string(string) === <<0xBE, string::binary>>
     end
 
     test "encodes a long string" do
@@ -408,30 +413,30 @@ defmodule VelocyPack.EncodeTest do
 
       <<indicator, size::little-unsigned-size(64), string::binary>> = Encode.encode_string(value)
 
-      assert indicator == 0xBF
-      assert size == byte_size(value)
-      assert string == value
+      assert indicator === 0xBF
+      assert size === byte_size(value)
+      assert string === value
     end
   end
 
   describe "encode_string_with_size/1" do
     test "encodes empty bit string" do
-      assert Encode.encode_string_with_size(<<>>) == {0x40, 1}
+      assert Encode.encode_string_with_size(<<>>) === {0x40, 1}
     end
 
     test "encodes empty string" do
-      assert Encode.encode_string_with_size("") == {0x40, 1}
+      assert Encode.encode_string_with_size("") === {0x40, 1}
     end
 
     test "encodes a short string" do
-      assert Encode.encode_string_with_size("a") == {<<0x41, "a">>, 2}
-      assert Encode.encode_string_with_size("foo") == {<<0x43, "foo">>, 4}
+      assert Encode.encode_string_with_size("a") === {<<0x41, "a">>, 2}
+      assert Encode.encode_string_with_size("foo") === {<<0x43, "foo">>, 4}
 
       string =
         "asdlfkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdfasdflkajsdflkjas" <>
           "dfasdfasdfasdfasdfalka"
 
-      assert Encode.encode_string_with_size(string) == {<<0xBE, string::binary>>, 127}
+      assert Encode.encode_string_with_size(string) === {<<0xBE, string::binary>>, 127}
     end
 
     test "encodes a long string" do
@@ -442,10 +447,10 @@ defmodule VelocyPack.EncodeTest do
       {<<indicator, size::little-unsigned-size(64), string::binary>>, encode_size} =
         Encode.encode_string_with_size(value)
 
-      assert indicator == 0xBF
-      assert size == byte_size(value)
-      assert string == value
-      assert encode_size == 221
+      assert indicator === 0xBF
+      assert size === byte_size(value)
+      assert string === value
+      assert encode_size === 221
     end
   end
 
@@ -454,12 +459,22 @@ defmodule VelocyPack.EncodeTest do
       encoded = Encode.encode_list([])
       assert encoded === 0x01
     end
+
+    test "encodes list when items are variable size" do
+      encoded = Encode.encode_list([1, "a", 10])
+      assert encoded === [0x06, <<0x0B>>, <<0x03>>, [0x31, <<0x41, 0x61>>, <<0x28, 0x0A>>], [0x03, 0x04, 0x06]]
+    end
   end
 
   describe "encode_list_with_size/1" do
     test "encodes an empty list" do
       encoded = Encode.encode_list_with_size([])
       assert encoded === {0x01, 1}
+    end
+
+    test "encodes list when items are variable size" do
+      encoded = Encode.encode_list_with_size([1, "a", 10])
+      assert encoded === {[0x06, <<0x0B>>, <<0x03>>, [0x31, <<0x41, 0x61>>, <<0x28, 0x0A>>], [0x03, 0x04, 0x06]], 11}
     end
   end
 

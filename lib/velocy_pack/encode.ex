@@ -7,6 +7,10 @@ defmodule VelocyPack.Encode do
     {:ok, do_encode(value)}
   end
 
+  def encode_with_size(value, _opts \\ []) do
+    {:ok, do_encode_with_size(value)}
+  end
+
   def encode_atom(value) when is_atom(value), do: do_encode_atom(value)
 
   def encode_atom_with_size(value) when is_atom(value), do: do_encode_atom_with_size(value)
@@ -32,14 +36,24 @@ defmodule VelocyPack.Encode do
   def encode_map_with_size(value) when is_map(value), do: do_encode_map_with_size(value)
 
   defp do_encode(value) when is_atom(value), do: do_encode_atom(value)
-  defp do_encode(value) when is_binary(value), do: do_encode_string(value)
   defp do_encode(value) when is_integer(value), do: do_encode_integer(value)
+  defp do_encode(value) when is_binary(value), do: do_encode_string(value)
   defp do_encode(value) when is_float(value), do: do_encode_float(value)
   defp do_encode(value) when is_list(value), do: do_encode_list(value)
   # defp do_encode(%{__struct__: module} = value), do: do_encode_struct(value, module)
   defp do_encode(value) when is_map(value), do: do_encode_map(value)
   # defp do_encode(value) when is_map(value), do: encode_map.(value, escape, encode_map)
   defp do_encode(value), do: Encoder.encode(value)
+
+  defp do_encode_with_size(value) when is_atom(value), do: do_encode_atom_with_size(value)
+  defp do_encode_with_size(value) when is_integer(value), do: do_encode_integer_with_size(value)
+  defp do_encode_with_size(value) when is_binary(value), do: do_encode_string_with_size(value)
+  defp do_encode_with_size(value) when is_float(value), do: do_encode_float_with_size(value)
+  defp do_encode_with_size(value) when is_list(value), do: do_encode_list_with_size(value)
+  # defp do_encode(%{__struct__: module} = value), do: do_encode_struct(value, module)
+  defp do_encode_with_size(value) when is_map(value), do: do_encode_map_with_size(value)
+  # defp do_encode(value) when is_map(value), do: encode_map.(value, escape, encode_map)
+  defp do_encode_with_size(value), do: Encoder.encode(value)
 
   defp do_encode_atom(nil), do: 0x18
   defp do_encode_atom(false), do: 0x19
@@ -191,11 +205,49 @@ defmodule VelocyPack.Encode do
   defp do_encode_float_with_size(_value) do
   end
 
-  def do_encode_list([]), do: 0x01
+  defp do_encode_list([]), do: 0x01
 
-  def do_encode_list_with_size([]), do: {0x01, 1}
+  defp do_encode_list(value) do
+    {list_size, nritems, reversed_list_with_sizes} =
+      Enum.reduce(value, {0, 0, []}, fn v, {ls, n, rlws} ->
+        {item, size} = Encoder.encode_with_size(v)
+        {ls + size, n + 1, [{item, size} | rlws]}
+      end)
 
-  def do_encode_map(%{}), do: 0x0A
+    create_list_with_index_table({list_size, nritems, reversed_list_with_sizes})
+  end
 
-  def do_encode_map_with_size(%{}), do: {0x0A, 1}
+  defp do_encode_list_with_size([]), do: {0x01, 1}
+
+  defp do_encode_list_with_size(value) do
+    encoded = Encoder.encode(value)
+    {encoded, get_encoded_size(encoded)}
+  end
+
+  defp do_encode_map(%{}), do: 0x0A
+
+  defp do_encode_map_with_size(%{}), do: {0x0A, 1}
+
+  # helpers
+  # todo - when nritems/list_size? - other list types
+  defp create_list_with_index_table({list_size, nritems, reversed_list_with_sizes}) do
+    {list, index_table, _} =
+      Enum.reduce(
+        reversed_list_with_sizes,
+        {[], [], list_size + 3},
+        fn {item, size}, {l, it, acc} ->
+          {[item | l], [acc - size | it], acc - size}
+        end
+      )
+
+    [
+      0x06,
+      <<list_size + nritems + 3::little-unsigned-size(8)>>,
+      <<nritems::little-unsigned-size(8)>>,
+      list,
+      index_table
+    ]
+  end
+
+  defp get_encoded_size([0x06, <<size::little-unsigned-size(8)>> | _]), do: size
 end
