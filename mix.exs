@@ -7,7 +7,7 @@ defmodule VelocyPack.Mixfile do
     [
       app: :velocy_pack,
       version: "0.1.0",
-      elixir: "~> 1.4",
+      elixir: "~> 1.7",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       name: "VelocyPack",

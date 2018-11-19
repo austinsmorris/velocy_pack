@@ -1,11 +1,15 @@
 language: elixir
 
 elixir:
-  - 1.4
+  - 1.7
 
 otp_release:
-  - 19.0
+  - 21.1
 
-script:
+install:
+  - MIX_ENV=test mix deps.get
+
+before_script:
+  - MIX_ENV=test mix format --check-formatted --dry-run
+  - MIX_ENV=test mix compile --warnings-as-errors
 #  - MIX_ENV=test mix credo --strict
-  - mix test
