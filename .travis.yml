@@ -7,7 +7,9 @@ otp_release:
   - 21.1
 
 install:
-  - MIX_ENV=test mix deps.get
+- MIX_ENV=test mix local.rebar --force
+- MIX_ENV=test mix local.hex --force
+- MIX_ENV=test mix deps.get
 
 before_script:
   - MIX_ENV=test mix format --check-formatted --dry-run
