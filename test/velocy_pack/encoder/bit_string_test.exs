@@ -3,15 +3,15 @@ defmodule VelocyPack.Encoder.BitStringTest do
 
   alias VelocyPack.Encoder
 
-  test "encode() an empty bit string" do
+  test "encode/2 an empty bit string" do
     assert Encoder.encode(<<>>) == 0x40
   end
 
-  test "encode() an empty string" do
+  test "encode/2 an empty string" do
     assert Encoder.encode("") == 0x40
   end
 
-  test "encode() a short string" do
+  test "encode/2 a short string" do
     assert Encoder.encode("a") == <<0x41, "a">>
     assert Encoder.encode("foo") == <<0x43, "foo">>
 
@@ -22,7 +22,7 @@ defmodule VelocyPack.Encoder.BitStringTest do
     assert Encoder.encode(string) == <<0xBE, string::binary>>
   end
 
-  test "encode() a long string" do
+  test "encode/2 a long string" do
     value =
       "asdlfkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkj" <>
         "asdflkajsdflkjasdflkjasdlksjadflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasd"
@@ -34,15 +34,15 @@ defmodule VelocyPack.Encoder.BitStringTest do
     assert string == value
   end
 
-  test "encode_with_size() an empty bit string" do
+  test "encode_with_size/2 an empty bit string" do
     assert Encoder.encode_with_size(<<>>) == {0x40, 1}
   end
 
-  test "encode_with_size() an empty string" do
+  test "encode_with_size/2 an empty string" do
     assert Encoder.encode_with_size("") == {0x40, 1}
   end
 
-  test "encode_with_size() a short string" do
+  test "encode_with_size/2 a short string" do
     assert Encoder.encode_with_size("a") == {<<0x41, "a">>, 2}
     assert Encoder.encode_with_size("foo") == {<<0x43, "foo">>, 4}
 
@@ -53,7 +53,7 @@ defmodule VelocyPack.Encoder.BitStringTest do
     assert Encoder.encode_with_size(string) == {<<0xBE, string::binary>>, 127}
   end
 
-  test "encode_with_size() a long string" do
+  test "encode_with_size/2 a long string" do
     value =
       "asdlfkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkj" <>
         "asdflkajsdflkjasdflkjasdlksjadflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasdflkjasd"
