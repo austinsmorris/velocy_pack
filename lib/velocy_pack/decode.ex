@@ -78,6 +78,35 @@ defmodule VelocyPack.Decode do
   # list
   defp do_decode(<<0x01, tail::binary>>), do: {[], tail}
 
+  # todo - ensure decoded list has the indicated number of items
+  defp do_decode(<<0x02, length::little-unsigned-size(8), rest::binary>>) do
+    list_length = (length - 2) * 8
+    <<list::size(list_length), tail::binary>> = rest
+    {decode_list(<<list::size(list_length)>>), tail}
+  end
+
+  defp do_decode(<<0x06, l::little-unsigned-size(8), n::little-unsigned-size(8), 0::size(48), r::binary>>) do
+    do_decode(<<0x06, l - 6::little-unsigned-size(8), n::little-unsigned-size(8), r::binary>>)
+  end
+
+  defp do_decode(<<0x06, length::little-unsigned-size(8), number::little-unsigned-size(8), rest::binary>>) do
+    list_length = (length - 3 - number) * 8
+    index_length = number * 8
+    <<list::size(list_length), _index::size(index_length), tail::binary>> = rest
+    {decode_list(<<list::size(list_length)>>), tail}
+  end
+
+  defp do_decode(<<0x07, l::little-unsigned-size(16), n::little-unsigned-size(16), 0::size(32), r::binary>>) do
+    do_decode(<<0x07, l - 4::little-unsigned-size(16), n::little-unsigned-size(16), r::binary>>)
+  end
+
+  defp do_decode(<<0x07, length::little-unsigned-size(16), number::little-unsigned-size(16), rest::binary>>) do
+    list_length = (length - 5 - number * 2) * 8
+    index_length = number * 2 * 8
+    <<list::size(list_length), _index::size(index_length), tail::binary>> = rest
+    {decode_list(<<list::size(list_length)>>), tail}
+  end
+
   defp do_decode(<<0x13, rest::binary>>) do
     {full_list_byte_size, list_size_byte_size} = get_compact_list_sizes(rest)
     list_bit_size = (full_list_byte_size - list_size_byte_size - 1) * 8
@@ -89,10 +118,25 @@ defmodule VelocyPack.Decode do
   # map
   defp do_decode(<<0x0A, tail::binary>>), do: {%{}, tail}
 
+  # todo - ensure decoded map has the indicated number of items
   defp do_decode(<<0x0B, length::little-unsigned-size(8), number::little-unsigned-size(8), rest::binary>>) do
     map_length = (length - 3) * 8
     <<map::size(map_length), tail::binary>> = rest
     {decode_map(<<map::size(map_length)>>, length - 3, number, 8, 0), tail}
+  end
+
+  defp do_decode(
+         <<0x0C, length::little-unsigned-size(16), number::little-unsigned-size(16), 0::size(32), rest::binary>>
+       ) do
+    map_length = (length - 9) * 8
+    <<map::size(map_length), tail::binary>> = rest
+    {decode_map(<<map::size(map_length)>>, length - 9, number, 16, 4), tail}
+  end
+
+  defp do_decode(<<0x0C, length::little-unsigned-size(16), number::little-unsigned-size(16), rest::binary>>) do
+    map_length = (length - 5) * 8
+    <<map::size(map_length), tail::binary>> = rest
+    {decode_map(<<map::size(map_length)>>, length - 5, number, 16, 0), tail}
   end
 
   defp do_decode(<<0x14, rest::binary>>) do
