@@ -1,4 +1,4 @@
-defmodule VelocyPack.Decoder do
+defmodule VelocyPack.Decode do
   @moduledoc false
 
   def decode(data, _opts \\ []) when is_binary(data) do
