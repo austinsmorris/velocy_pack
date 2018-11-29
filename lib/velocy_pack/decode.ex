@@ -14,7 +14,7 @@ defmodule VelocyPack.Decode do
     else
       {value, ""} -> {:ok, value}
       # todo - what to do if multiple values are returned?  tuple?
-      _ -> {:error, "what do i do?"}
+      x -> {:error, x}
     end
   end
 
