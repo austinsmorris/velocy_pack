@@ -19,6 +19,11 @@ defmodule VelocyPack.EncodeTest do
       assert encoded === 0x0A
     end
 
+    test "encodes non-empty map" do
+      {:ok, encoded} = Encode.encode(%{b: true, a: 12, c: "xyz"})
+      assert encoded === [11, <<19>>, <<3>>, [["Aa", "(\f"], ["Ab", 26], ["Ac", "Cxyz"]], [3, 7, 10]]
+    end
+
     test "encodes nil" do
       {:ok, encoded} = Encode.encode(nil)
       assert encoded === 0x18
@@ -482,6 +487,11 @@ defmodule VelocyPack.EncodeTest do
     test "encodes an empty map" do
       encoded = Encode.encode_map(%{})
       assert encoded === 0x0A
+    end
+
+    test "encodes non-empty map" do
+      encoded = Encode.encode_map(%{b: true, a: 12, c: "xyz"})
+      assert encoded === [11, <<19>>, <<3>>, [["Aa", "(\f"], ["Ab", 26], ["Ac", "Cxyz"]], [3, 7, 10]]
     end
   end
 

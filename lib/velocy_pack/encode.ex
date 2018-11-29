@@ -224,9 +224,25 @@ defmodule VelocyPack.Encode do
     {encoded, get_encoded_size(encoded)}
   end
 
-  defp do_encode_map(%{}), do: 0x0A
+  defp do_encode_map(%{} = map) when map === %{}, do: 0x0A
+
+  defp do_encode_map(value) do
+    {total_size, nr_items, reversed_list_with_sizes} =
+      Enum.reduce(value, {0, 0, []}, fn {k, v}, {ls, n, rlws} ->
+        {key, key_size} = Encoder.encode_with_size(k)
+        {value, value_size} = Encoder.encode_with_size(v)
+        {ls + key_size + value_size, n + 1, [{{key, key_size}, {value, value_size}} | rlws]}
+      end)
+
+    create_map_with_index_table(total_size, nr_items, reversed_list_with_sizes)
+  end
 
   defp do_encode_map_with_size(%{}), do: {0x0A, 1}
+
+  defp do_encode_map_with_size(value) do
+    encoded = Encoder.encode(value)
+    {encoded, get_encoded_size(encoded)}
+  end
 
   # helpers
   # todo - when nritems/list_size? - other list types
@@ -249,5 +265,27 @@ defmodule VelocyPack.Encode do
     ]
   end
 
+  # todo - when nritems/list_size? - other map types
+  defp create_map_with_index_table(total_size, nritems, reversed_list_with_sizes) do
+    {map, index_table, _} =
+      Enum.reduce(
+        reversed_list_with_sizes,
+        {[], [], total_size + 3},
+        fn {{key, key_size}, {value, value_size}}, {iodata, it, acc} ->
+          {[[key, value] | iodata], [acc - key_size - value_size | it], acc - key_size - value_size}
+        end
+      )
+
+    # todo = sort the index table by key
+    [
+      0x0B,
+      <<total_size + nritems + 3::little-unsigned-size(8)>>,
+      <<nritems::little-unsigned-size(8)>>,
+      map,
+      index_table
+    ]
+  end
+
   defp get_encoded_size([0x06, <<size::little-unsigned-size(8)>> | _]), do: size
+  defp get_encoded_size([0x0B, <<size::little-unsigned-size(8)>> | _]), do: size
 end
