@@ -12,7 +12,9 @@ defmodule VelocyPack.Decode do
     catch
       e -> {:error, e}
     else
-      # todo - because Vpack is a steam of binary data, it should always return a valid value with tailing data
+      # todo - because Vpack is a steam of binary data, it could either be a single value or a valid value with
+      # todo - trailing data, something the calling application should control
+      {value, ""} -> {:ok, value}
       {value, tail} -> {:ok, value, tail}
       # todo - is it even possible to get here?
       x -> {:error, x}
