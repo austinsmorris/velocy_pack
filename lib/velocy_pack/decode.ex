@@ -12,8 +12,9 @@ defmodule VelocyPack.Decode do
     catch
       e -> {:error, e}
     else
-      {value, ""} -> {:ok, value}
-      # todo - what to do if multiple values are returned?  tuple?
+      # todo - because Vpack is a steam of binary data, it should always return a valid value with tailing data
+      {value, tail} -> {:ok, value, tail}
+      # todo - is it even possible to get here?
       x -> {:error, x}
     end
   end
