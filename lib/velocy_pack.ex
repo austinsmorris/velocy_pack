@@ -15,6 +15,7 @@ defmodule VelocyPack do
   def decode!(data, opts \\ []) do
     case decode(data, opts) do
       {:ok, value} -> value
+      {:ok, value, tail} -> {value, tail}
       {:error, error} -> raise error
     end
   end

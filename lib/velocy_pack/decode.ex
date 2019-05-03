@@ -150,6 +150,12 @@ defmodule VelocyPack.Decode do
     {decode_map(<<map::size(map_bit_size)>>, map_bit_size), tail}
   end
 
+  defp do_decode(x) do
+    IO.inspect x, limit: 1000
+    raise "boom"
+  end
+
+
   # helpers
   defp decode_list(list), do: do_decode_list(list, [])
 
