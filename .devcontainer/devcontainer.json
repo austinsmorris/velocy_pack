@@ -1,5 +1,5 @@
 {
-  "image": "elixir:1.14",
+  "image": "elixir:1.14.4",
   "features": {
   }
 }
